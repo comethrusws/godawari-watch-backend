@@ -31,7 +31,7 @@ export const login = async (req: Request, res: Response) => {
       { expiresIn: '24h' }
     );
 
-    res.json({
+    return res.json({
       success: true,
       data: {
         token,
@@ -39,6 +39,6 @@ export const login = async (req: Request, res: Response) => {
       }
     });
   } catch (error: any) {
-    res.status(500).json({ success: false, error: error.message });
+    return res.status(500).json({ success: false, error: error.message });
   }
 };

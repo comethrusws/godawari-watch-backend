@@ -9,7 +9,7 @@ import citizenRoutes from './routes/citizen.routes';
 import authRoutes from './routes/auth.routes';
 import mediaRoutes from './routes/media.routes';
 import staffRoutes from './routes/staff.routes';
-import { authMiddleware } from './middleware/auth.middleware';
+// import { authMiddleware } from './middleware/auth.middleware';
 import swaggerUi from 'swagger-ui-express';
 import { swaggerSpec } from './config/swagger';
 
@@ -30,7 +30,7 @@ app.use('/api/citizens', citizenRoutes);
 app.use('/api/media', mediaRoutes);
 app.use('/api/staff', staffRoutes);
 
-app.get('/health', (req, res) => {
+app.get('/health', (_req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 

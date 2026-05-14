@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import bcrypt from 'bcrypt';
 import { supabase } from '../config/supabase';
 
-export const getStaff = async (req: Request, res: Response) => {
+export const getStaff = async (_req: Request, res: Response) => {
   try {
     const { data, error } = await supabase
       .from('admins')
@@ -10,9 +10,9 @@ export const getStaff = async (req: Request, res: Response) => {
       .order('created_at', { ascending: false });
 
     if (error) throw error;
-    res.json({ success: true, data });
+    return res.json({ success: true, data });
   } catch (error: any) {
-    res.status(500).json({ success: false, error: error.message });
+    return res.status(500).json({ success: false, error: error.message });
   }
 };
 
@@ -35,10 +35,10 @@ export const createStaff = async (req: Request, res: Response) => {
       return res.status(201).json({ success: true, message: 'Staff created but no data returned' });
     }
 
-    res.status(201).json({ success: true, data: data[0] });
+    return res.status(201).json({ success: true, data: data[0] });
   } catch (error: any) {
     console.error('Error creating staff:', error);
-    res.status(500).json({ success: false, error: error.message });
+    return res.status(500).json({ success: false, error: error.message });
   }
 };
 
@@ -54,8 +54,8 @@ export const deleteStaff = async (req: Request, res: Response) => {
     const { error } = await supabase.from('admins').delete().eq('id', id);
 
     if (error) throw error;
-    res.json({ success: true, message: 'Staff member removed' });
+    return res.json({ success: true, message: 'Staff member removed' });
   } catch (error: any) {
-    res.status(500).json({ success: false, error: error.message });
+    return res.status(500).json({ success: false, error: error.message });
   }
 };

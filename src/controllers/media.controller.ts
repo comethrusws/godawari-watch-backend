@@ -12,7 +12,7 @@ export const uploadMedia = async (req: Request, res: Response) => {
     const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
     const filePath = `media/${fileName}`;
 
-    const { data, error: uploadError } = await supabase.storage
+    const { error: uploadError } = await supabase.storage
       .from('images')
       .upload(filePath, file.buffer, {
         contentType: file.mimetype,
@@ -26,7 +26,7 @@ export const uploadMedia = async (req: Request, res: Response) => {
       .from('images')
       .getPublicUrl(filePath);
 
-    res.status(201).json({ 
+    return res.status(201).json({ 
       success: true, 
       data: { 
         url: publicUrl,
@@ -36,6 +36,6 @@ export const uploadMedia = async (req: Request, res: Response) => {
     });
   } catch (error: any) {
     console.error('Upload Error:', error);
-    res.status(500).json({ success: false, error: error.message });
+    return res.status(500).json({ success: false, error: error.message });
   }
 };

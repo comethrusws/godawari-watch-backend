@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { supabase } from '../config/supabase';
 
-export const getDepartments = async (req: Request, res: Response) => {
+export const getDepartments = async (_req: Request, res: Response) => {
   try {
     const { data, error } = await supabase
       .from('departments')

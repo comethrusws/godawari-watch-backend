@@ -13,7 +13,7 @@ export const createAlert = async (req: Request, res: Response) => {
       const fileName = `${Math.random()}.${fileExt}`;
       const filePath = `alerts/${fileName}`;
 
-      const { data, error: uploadError } = await supabase.storage
+      const { error: uploadError } = await supabase.storage
         .from('images')
         .upload(filePath, file.buffer, {
           contentType: file.mimetype,

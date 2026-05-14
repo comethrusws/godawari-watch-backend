@@ -13,7 +13,7 @@ export const createNotice = async (req: Request, res: Response) => {
       const fileName = `${Math.random()}.${fileExt}`;
       const filePath = `notices/${fileName}`;
 
-      const { data, error: uploadError } = await supabase.storage
+      const { error: uploadError } = await supabase.storage
         .from('images')
         .upload(filePath, file.buffer, {
           contentType: file.mimetype,
@@ -35,13 +35,13 @@ export const createNotice = async (req: Request, res: Response) => {
 
     if (error) throw error;
 
-    res.status(201).json({ success: true, data: data[0] });
+    return res.status(201).json({ success: true, data: data[0] });
   } catch (error: any) {
-    res.status(500).json({ success: false, error: error.message });
+    return res.status(500).json({ success: false, error: error.message });
   }
 };
 
-export const getNotices = async (req: Request, res: Response) => {
+export const getNotices = async (_req: Request, res: Response) => {
   try {
     const { data, error } = await supabase
       .from('notices')
@@ -50,9 +50,9 @@ export const getNotices = async (req: Request, res: Response) => {
 
     if (error) throw error;
 
-    res.json({ success: true, data });
+    return res.json({ success: true, data });
   } catch (error: any) {
-    res.status(500).json({ success: false, error: error.message });
+    return res.status(500).json({ success: false, error: error.message });
   }
 };
 
@@ -64,8 +64,8 @@ export const deleteNotice = async (req: Request, res: Response) => {
 
     if (error) throw error;
 
-    res.json({ success: true, message: 'Notice deleted' });
+    return res.json({ success: true, message: 'Notice deleted' });
   } catch (error: any) {
-    res.status(500).json({ success: false, error: error.message });
+    return res.status(500).json({ success: false, error: error.message });
   }
 };

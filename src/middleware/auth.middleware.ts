@@ -13,7 +13,7 @@ export const authMiddleware = (req: Request, res: Response, next: NextFunction) 
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
     (req as any).user = decoded;
-    next();
+    return next();
   } catch (error) {
     return res.status(401).json({ success: false, error: 'Unauthorized: Invalid token' });
   }
