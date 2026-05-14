@@ -21,7 +21,9 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+const CSS_URL = "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui.min.css";
+
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, { customCssUrl: CSS_URL }));
 app.use('/api/auth', authRoutes);
 app.use('/api/alerts', alertRoutes); // Alerts can be public to post, but maybe protected to fetch? 
 app.use('/api/notices', noticeRoutes);
