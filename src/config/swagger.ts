@@ -1,3 +1,4 @@
+import path from 'path';
 import swaggerJsdoc from 'swagger-jsdoc';
 
 const options: swaggerJsdoc.Options = {
@@ -9,6 +10,10 @@ const options: swaggerJsdoc.Options = {
       description: 'API documentation for the Godawari Alert citizen problem escalation system.',
     },
     servers: [
+      {
+        url: 'https://api-godawari-watch.vercel.app',
+        description: 'Production server',
+      },
       {
         url: 'http://localhost:3000',
         description: 'Development server',
@@ -24,7 +29,10 @@ const options: swaggerJsdoc.Options = {
       },
     },
   },
-  apis: ['./src/routes/*.ts', './dist/routes/*.js'], // Path to the API docs
+  apis: [
+    path.join(__dirname, '../routes/*.ts'),
+    path.join(__dirname, '../routes/*.js'),
+  ], // Path to the API docs
 };
 
 export const swaggerSpec = swaggerJsdoc(options);
