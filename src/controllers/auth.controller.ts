@@ -35,7 +35,12 @@ export const login = async (req: Request, res: Response) => {
       success: true,
       data: {
         token,
-        user: { id: admin.id, username: admin.username, role: admin.role }
+        user: { 
+          id: admin.id, 
+          username: admin.username, 
+          role: admin.role,
+          full_name: admin.full_name 
+        }
       }
     });
   } catch (error: any) {

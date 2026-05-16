@@ -1,6 +1,53 @@
 import { Request, Response } from 'express';
 import { supabase } from '../config/supabase';
 
+export const getNotices = async (req: Request, res: Response) => {
+  try {
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const from = (page - 1) * limit;
+    const to = from + limit - 1;
+
+    const { data, error, count } = await supabase
+      .from('notices')
+      .select('*', { count: 'exact' })
+      .order('created_at', { ascending: false })
+      .range(from, to);
+
+    if (error) throw error;
+
+    return res.json({ 
+      success: true, 
+      data,
+      pagination: {
+        page,
+        limit,
+        total: count || 0,
+        totalPages: Math.ceil((count || 0) / limit)
+      }
+    });
+  } catch (error: any) {
+    return res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+export const getNoticeById = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { data, error } = await supabase
+      .from('notices')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (error) throw error;
+
+    return res.json({ success: true, data });
+  } catch (error: any) {
+    return res.status(500).json({ success: false, error: error.message });
+  }
+};
+
 export const createNotice = async (req: Request, res: Response) => {
   try {
     const { title, content } = req.body;
@@ -41,16 +88,43 @@ export const createNotice = async (req: Request, res: Response) => {
   }
 };
 
-export const getNotices = async (_req: Request, res: Response) => {
+export const updateNotice = async (req: Request, res: Response) => {
   try {
+    const { id } = req.params;
+    const { title, content } = req.body;
+    const file = req.file;
+
+    let updateData: any = { title, content };
+
+    if (file) {
+      const fileExt = file.originalname.split('.').pop();
+      const fileName = `${Math.random()}.${fileExt}`;
+      const filePath = `notices/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('images')
+        .upload(filePath, file.buffer, {
+          contentType: file.mimetype,
+        });
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('images')
+        .getPublicUrl(filePath);
+
+      updateData.media_url = publicUrl;
+    }
+
     const { data, error } = await supabase
       .from('notices')
-      .select('*')
-      .order('created_at', { ascending: false });
+      .update(updateData)
+      .eq('id', id)
+      .select();
 
     if (error) throw error;
 
-    return res.json({ success: true, data });
+    return res.json({ success: true, data: data[0] });
   } catch (error: any) {
     return res.status(500).json({ success: false, error: error.message });
   }

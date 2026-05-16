@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import multer from 'multer';
-import { createAlert, getAlerts, updateAlertStatus } from '../controllers/alert.controller';
+import { createAlert, getAlerts, updateAlertStatus, getAlertById, getAlertStats, exportAlerts } from '../controllers/alert.controller';
+import { getComments, addComment, addCitizenMessage } from '../controllers/comment.controller';
 import { authMiddleware } from '../middleware/auth.middleware';
 
 const router = Router();
@@ -119,6 +120,13 @@ const upload = multer({ storage: multer.memoryStorage() });
  */
 router.post('/', upload.single('file'), createAlert);
 router.get('/', authMiddleware, getAlerts);
+router.get('/export', authMiddleware, exportAlerts);
+router.get('/stats', authMiddleware, getAlertStats);
+router.get('/:id', authMiddleware, getAlertById);
 router.patch('/:id', authMiddleware, updateAlertStatus);
+
+router.get('/:alertId/comments', authMiddleware, getComments);
+router.post('/:alertId/comments', authMiddleware, addComment);
+router.post('/:alertId/messages', authMiddleware, addCitizenMessage);
 
 export default router;

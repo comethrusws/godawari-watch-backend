@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { getStaff, createStaff, deleteStaff } from '../controllers/staff.controller';
+import { getStaff, createStaff, deleteStaff, updateStaff, getStaffPerformance } from '../controllers/staff.controller';
 import { authMiddleware } from '../middleware/auth.middleware';
 import { roleMiddleware } from '../middleware/role.middleware';
 
@@ -16,23 +16,6 @@ const router = Router();
  *     responses:
  *       200:
  *         description: List of staff members
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 type: object
- *                 properties:
- *                   id:
- *                     type: string
- *                   username:
- *                     type: string
- *                   full_name:
- *                     type: string
- *                   role:
- *                     type: string
- *                   created_at:
- *                     type: string
  *   post:
  *     summary: Create a new staff member
  *     tags: [Staff]
@@ -58,10 +41,58 @@ const router = Router();
  *                 type: string
  *               role:
  *                 type: string
- *                 enum: [super_admin, operator, staff]
+ */
+
+/**
+ * @swagger
+ * /api/staff/{id}:
+ *   put:
+ *     summary: Update a staff member (Admin only)
+ *     tags: [Staff]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               username:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *               full_name:
+ *                 type: string
+ *               role:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Staff updated
+ *   delete:
+ *     summary: Delete a staff member (Admin only)
+ *     tags: [Staff]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Staff deleted
  */
 router.get('/', authMiddleware, roleMiddleware(['super_admin']), getStaff);
+router.get('/performance', authMiddleware, roleMiddleware(['super_admin']), getStaffPerformance);
 router.post('/', authMiddleware, roleMiddleware(['super_admin']), createStaff);
+router.put('/:id', authMiddleware, roleMiddleware(['super_admin']), updateStaff);
 router.delete('/:id', authMiddleware, roleMiddleware(['super_admin']), deleteStaff);
 
 export default router;
