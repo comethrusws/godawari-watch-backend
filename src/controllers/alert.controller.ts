@@ -18,6 +18,17 @@ export const createAlert = async (req: Request, res: Response) => {
     const { category, description, location_lat, location_lng, created_by, priority } = req.body;
     const file = req.file;
 
+    if (!category) {
+      return res.status(400).json({ success: false, error: 'category is required' });
+    }
+
+    const createdBy =
+      created_by && String(created_by).trim() !== '' ? String(created_by).trim() : null;
+    const lat =
+      location_lat != null && location_lat !== '' ? parseFloat(String(location_lat)) : null;
+    const lng =
+      location_lng != null && location_lng !== '' ? parseFloat(String(location_lng)) : null;
+
     let media_url = null;
 
     if (file) {
@@ -50,9 +61,9 @@ export const createAlert = async (req: Request, res: Response) => {
           category,
           description,
           media_url,
-          location_lat,
-          location_lng,
-          created_by,
+          location_lat: lat,
+          location_lng: lng,
+          created_by: createdBy,
           priority: initialPriority,
           due_date
         },
@@ -61,10 +72,10 @@ export const createAlert = async (req: Request, res: Response) => {
 
     if (error) throw error;
 
-    res.status(201).json({ success: true, data: data[0] });
+    return res.status(201).json({ success: true, data: data[0] });
   } catch (error: any) {
     console.error('Error creating alert:', error);
-    res.status(500).json({ success: false, error: error.message });
+    return res.status(500).json({ success: false, error: error.message });
   }
 };
 
