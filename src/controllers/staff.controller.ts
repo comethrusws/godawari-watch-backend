@@ -6,11 +6,17 @@ export const getStaff = async (_req: Request, res: Response) => {
   try {
     const { data, error } = await supabase
       .from('admins')
-      .select('id, username, full_name, avatar_url, role, created_at')
+      .select('id, username, full_name, avatar_url, role, created_at, department_id, departments(name)')
       .order('created_at', { ascending: false });
 
     if (error) throw error;
-    return res.json({ success: true, data });
+
+    const formatted = (data || []).map((admin: any) => ({
+      ...admin,
+      department_name: admin.departments?.name || null
+    }));
+
+    return res.json({ success: true, data: formatted });
   } catch (error: any) {
     return res.status(500).json({ success: false, error: error.message });
   }
@@ -18,14 +24,20 @@ export const getStaff = async (_req: Request, res: Response) => {
 
 export const createStaff = async (req: Request, res: Response) => {
   try {
-    const { username, password, full_name, role } = req.body;
+    const { username, password, full_name, role, department_id } = req.body;
 
     const password_hash = await bcrypt.hash(password, 10);
 
     const { data, error } = await supabase
       .from('admins')
-      .insert([{ username, password_hash, full_name, role }])
-      .select('id, username, full_name, avatar_url, role, created_at');
+      .insert([{ 
+        username, 
+        password_hash, 
+        full_name, 
+        role,
+        department_id: role === 'staff' && department_id ? department_id : null
+      }])
+      .select('id, username, full_name, avatar_url, role, created_at, department_id');
 
     if (error) throw error;
     
@@ -62,9 +74,14 @@ export const deleteStaff = async (req: Request, res: Response) => {
 export const updateStaff = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const { username, password, full_name, role, avatar_url } = req.body;
+    const { username, password, full_name, role, avatar_url, department_id } = req.body;
 
-    let updateData: any = { username, full_name, role };
+    let updateData: any = { 
+      username, 
+      full_name, 
+      role,
+      department_id: role === 'staff' && department_id ? department_id : null
+    };
     if (avatar_url !== undefined) updateData.avatar_url = avatar_url;
 
     if (password) {
@@ -75,7 +92,7 @@ export const updateStaff = async (req: Request, res: Response) => {
       .from('admins')
       .update(updateData)
       .eq('id', id)
-      .select('id, username, full_name, avatar_url, role, created_at');
+      .select('id, username, full_name, avatar_url, role, created_at, department_id');
 
     if (error) throw error;
     return res.json({ success: true, data: data[0] });

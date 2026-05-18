@@ -86,14 +86,21 @@ export const getAlerts = async (req: Request, res: Response) => {
     const limit = parseInt(req.query.limit as string) || 10;
     const from = (page - 1) * limit;
     const to = from + limit - 1;
+    const user = (req as any).user;
 
     let query = supabase
       .from('alerts')
       .select('*, departments(name)', { count: 'exact' });
 
-    if (category) query = query.eq('category', category);
-    if (status) query = query.eq('status', status);
-    if (department_id) query = query.eq('assigned_to', department_id);
+    // Enforce department isolation for department staff members
+    if (user && user.role === 'staff' && user.department_id) {
+      query = query.eq('assigned_to', user.department_id);
+    } else {
+      if (category) query = query.eq('category', category);
+      if (status) query = query.eq('status', status);
+      if (department_id) query = query.eq('assigned_to', department_id);
+    }
+    
     if (priority) query = query.eq('priority', priority);
     
     // Dynamic SLA filtering
@@ -125,6 +132,7 @@ export const getAlerts = async (req: Request, res: Response) => {
 export const getAlertById = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
+    const user = (req as any).user;
 
     const { data: alert, error } = await supabase
       .from('alerts')
@@ -135,6 +143,11 @@ export const getAlertById = async (req: Request, res: Response) => {
     if (error) throw error;
     if (!alert) {
       return res.status(404).json({ success: false, error: 'Alert not found' });
+    }
+
+    // Enforce department isolation for department staff members
+    if (user && user.role === 'staff' && user.department_id && alert.assigned_to !== user.department_id) {
+      return res.status(403).json({ success: false, error: 'Access denied: Alert is not assigned to your department' });
     }
 
     let citizen = null;
@@ -258,11 +271,20 @@ export const updateAlertStatus = async (req: Request, res: Response) => {
   }
 };
 
-export const getAlertStats = async (_req: Request, res: Response) => {
+export const getAlertStats = async (req: Request, res: Response) => {
   try {
-    const { data: alerts, error } = await supabase
+    const user = (req as any).user;
+
+    let query = supabase
       .from('alerts')
       .select('id, status, category, priority, assigned_to, created_at, resolved_at, due_date');
+
+    // Enforce department isolation for department staff members
+    if (user && user.role === 'staff' && user.department_id) {
+      query = query.eq('assigned_to', user.department_id);
+    }
+
+    const { data: alerts, error } = await query;
 
     if (error) throw error;
 
